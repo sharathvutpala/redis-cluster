@@ -79,3 +79,13 @@ sentinel slaves master01
 sentinel sentinels master01
 ```
 ## Testing the Failover
+
+To test our failover mechanism we can kill our master and check if the configuration changes. We can make our master not reachable for 30 seconds, by using this command
+``` bash
+$ redis-cli -p 6379 DEBUG sleep 30
+```
+If we check the Sentinel logs, we should be able to see a lot of action:
+1) Each Sentinel detects the master is down with an +sdown event.
+2) This event is later escalated to +odown, which means that multiple Sentinels agree about the fact the master is not reachable.
+3) Sentinels vote a Sentinel that will start the first failover attempt.
+4) The failover happens.
