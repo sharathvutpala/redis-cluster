@@ -14,6 +14,7 @@ From the host machine we can configure the infrastructure mentioned in this guid
 ``` bash
 $ ansible-playbook -i inventory.txt redis-ansible.yml -u ubuntu -b 
 ```
+**Note:** We make use of argument -u, to tell the playbook to login as user ubuntu, and -b is for privilege escalation using become method
 Here is the inventory file.
 ``` ini
 [redis-master]
