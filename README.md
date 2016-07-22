@@ -57,3 +57,9 @@ And here is the playbook.
     - ansible-redis
 ```
 
+We can test the status of master node, number of slave nodes, their status by logging in to any of sentinel nodes. 
+
+To login into any of the sentinel node, master node, or slave node 
+``` bash
+$ ssh -i ansible.pem ubuntu@IPADDRESS
+```
