@@ -5,3 +5,11 @@ Highly-available redis cluster is configured with 1 Master node, 3 slave nodes a
 
 Cloudformation stack redis.json is used to provide the infrastructure needed for building the high-available redis cluster mentioned in this guide. 
 
+Present setup is automated with the help of Ansible. A role called ansible-redis is used. 
+
+From the host machine we can configure the infrastructure mentioned in this guide, by running ansible-playbook "redis-ansible.yml" with some arguments. 
+
+ansible-playbook -i inventory.txt redis-ansible.yml -u ubuntu -b 
+
+
+
