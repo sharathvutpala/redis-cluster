@@ -11,7 +11,9 @@ Present setup is automated with the help of Ansible. A role called ansible-redis
 
 From the host machine we can configure the infrastructure mentioned in this guide, by running ansible-playbook "redis-ansible.yml" with some arguments. 
 
-### ansible-playbook -i inventory.txt redis-ansible.yml -u ubuntu -b 
+``` bash
+$ ansible-playbook -i inventory.txt redis-ansible.yml -u ubuntu -b 
+```
 
 
 
