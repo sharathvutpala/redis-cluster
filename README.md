@@ -73,7 +73,9 @@ $ redis-cli -p 26379
 ```
 This gives all the information about our master, in this case, our master's name is master01, so we get all the information about master01.
 
-Similarly we can get all the information about our slave nodes using 
+Similarly we can get all the information about our slave nodes and sentinel nodes using 
 ``` ini
 sentinel slaves master01
+sentinel sentinels master01
 ```
+## Testing the Failover
