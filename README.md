@@ -30,7 +30,28 @@ Here is the inventory file.
 54.174.149.211 redis_sentinel=True
 54.164.98.169 redis_sentinel=True
 ```
+And here is the playbook.
 
+``` yml 
+---
+- name: configure the master redis server
+  hosts: redis-master
+  roles:
+    - ansible-redis
 
+- name: configure redis slaves
+  hosts: redis-slave
+  vars:
+    - redis_slaveof: 52.90.113.117 6379
+  roles:
+    - ansible-redis
 
-
+- name: configure redis sentinel nodes
+  hosts: redis-sentinel
+  vars:
+    - redis_sentinel_monitors:
+      - name: master01
+        host: 52.90.113.117
+        port: 6379
+  roles:
+    - ansible-redis
