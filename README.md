@@ -14,6 +14,22 @@ From the host machine we can configure the infrastructure mentioned in this guid
 ``` bash
 $ ansible-playbook -i inventory.txt redis-ansible.yml -u ubuntu -b 
 ```
+Here is the inventory file.
+``` ini
+[redis-master]
+52.90.113.117
+
+[redis-slave]
+54.152.5.35
+54.165.232.211
+52.90.195.178
+
+[redis-sentinel]
+54.164.80.86 redis_sentinel=True
+54.174.149.211 redis_sentinel=True
+54.164.98.169 redis_sentinel=True
+```
+
 
 
 
