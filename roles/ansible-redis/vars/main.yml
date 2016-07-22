@@ -1,0 +1,3 @@
+# From https://github.com/antirez/redis-hashes
+redis_checksums:
+  2.8.9: 003ccdc175816e0a751919cf508f1318e54aac1e
