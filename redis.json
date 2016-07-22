@@ -1,0 +1,273 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Redis cluster Stack",
+  "Parameters": {
+    "RedisSentinelAMI": {
+      "Default": "ami-xxxx",
+      "ConstraintDescription": "must be a valid ami.",
+      "Type": "String",
+      "Description": "AMI id for RedisSentinelAMI"
+    },
+    "RedisAMI": {
+      "Default": "ami-xxxx",
+      "ConstraintDescription": "must be a valid ami.",
+      "Type": "String",
+      "Description": "AMI id for RedisAMI"
+    },
+    "PrivateSubnet0": {
+      "Default": "",
+      "ConstraintDescription": "",
+      "Type": "String",
+      "Description": "Subnet Id for PrivateSubnet0"
+    },
+    "PrivateSubnet1": {
+      "Default": "",
+      "ConstraintDescription": "",
+      "Type": "String",
+      "Description": "Subnet Id for PrivateSubnet1"
+    },
+    "PublicSubnet0": {
+      "Default": "",
+      "ConstraintDescription": "",
+      "Type": "String",
+      "Description": "Subnet Id for PublicSubnet0"
+    },
+    "PublicSubnet1": {
+      "Default": "",
+      "ConstraintDescription": "",
+      "Type": "String",
+      "Description": "Subnet Id for PublicSubnet1"
+    },
+    "Vpc": {
+      "Default": "",
+      "ConstraintDescription": "",
+      "Type": "String",
+      "Description": "VPC Id"
+    }
+  },
+  "Resources": {
+    "redisSG": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "SecurityGroupIngress": [
+          {
+            "ToPort": "22",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "FromPort": "22"
+          },
+          {
+            "ToPort": "6379",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "FromPort": "6379"
+          }
+          
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "GroupDescription": "Redis Security Group",
+        "Tags": [
+          {
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "redisSG"
+                ]
+              ]
+            },
+            "Key": "Name"
+          }
+        ]
+      }
+    },
+    "redissentinelSG": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "SecurityGroupIngress": [
+          {
+            "ToPort": "22",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "FromPort": "22"
+          },
+          {
+            "ToPort": "6379",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "FromPort": "6379"
+          },
+          {
+            "ToPort": "26739",
+            "IpProtocol": "tcp",
+            "CidrIp": "0.0.0.0/0",
+            "FromPort": "26379"
+          }
+
+          
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        },
+        "GroupDescription": "Redis Sentinel Security Group",
+        "Tags": [
+          {
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "redissentinelSG"
+                ]
+              ]
+            },
+            "Key": "Name"
+          }
+        ]
+      }
+    },
+    "RedisSentinelLc": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "Properties": {
+        "ImageId": {
+          "Ref": "RedisSentinelAMI"
+        },
+        "KeyName": "ansible",
+        "SecurityGroups": [
+          {
+            "Ref": "redissentinelSG"
+          }
+        ],
+        "InstanceType": "t2.micro",
+        "AssociatePublicIpAddress": true
+      }
+    },
+    "RedisSentinelASG": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "MinSize": 3,
+        "Tags": [
+          {
+            "PropagateAtLaunch": "true",
+            "Value": "sentinel",
+            "Key": "Hostname"
+          },
+          {
+            "PropagateAtLaunch": "true",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "RedisSentinel"
+                ]
+              ]
+            },
+            "Key": "Name"
+          }
+        ],
+        "MaxSize": 3,
+        "HealthCheckGracePeriod": "600",
+        "DesiredCapacity": 3,
+        "LaunchConfigurationName": {
+          "Ref": "RedisSentinelLc"
+        },
+        "VPCZoneIdentifier": [
+          {
+            "Ref": "PublicSubnet0"
+          }
+        ],
+        "AvailabilityZones": [
+          {
+            "Fn::Select": [
+              0,
+              {
+                "Fn::GetAZs": {
+                  "Ref": "AWS::Region"
+                }
+              }
+            ]
+          }
+        ],
+        "HealthCheckType": "EC2"
+      }
+    },
+    "RedisLc": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "Properties": {
+        "ImageId": {
+          "Ref": "RedisAMI"
+        },
+        "KeyName": "ansible",
+        "SecurityGroups": [
+          {
+            "Ref": "redisSG"
+          }
+        ],
+        "InstanceType": "t2.micro",
+        "AssociatePublicIpAddress": true
+      }
+    },
+    "RedisASG": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "Properties": {
+        "MinSize": 4,
+        "Tags": [
+          {
+            "PropagateAtLaunch": "true",
+            "Value": "redis",
+            "Key": "Hostname"
+          },
+          {
+            "PropagateAtLaunch": "true",
+            "Value": {
+              "Fn::Join": [
+                "-",
+                [
+                  {
+                    "Ref": "AWS::StackName"
+                  },
+                  "Redis"
+                ]
+              ]
+            },
+            "Key": "Name"
+          }
+        ],
+        "MaxSize": 4,
+        "HealthCheckGracePeriod": "600",
+        "DesiredCapacity": 4,
+        "LaunchConfigurationName": {
+          "Ref": "RedisLc"
+        },
+        "VPCZoneIdentifier": [
+          {
+            "Ref": "PublicSubnet0"
+          }
+        ],
+        "AvailabilityZones": [
+          {
+            "Fn::Select": [
+              0,
+              {
+                "Fn::GetAZs": {
+                  "Ref": "AWS::Region"
+                }
+              }
+            ]
+          }
+        ],
+        "HealthCheckType": "EC2"
+      }
+    }
+  }
+}
