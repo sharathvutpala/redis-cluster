@@ -63,3 +63,17 @@ To login into any of the sentinel node, master node, or slave node
 ``` bash
 $ ssh -i ansible.pem ubuntu@IPADDRESS
 ```
+After logged in to any of the sentinel node, we can check the status of master node, slave nodes. 
+
+We can use redis-cli command.
+
+``` bash
+$ redis-cli -p 26379
+127.0.0.1:26379> sentinel master master01
+```
+This gives all the information about our master, in this case, our master's name is master01, so we get all the information about master01.
+
+Similarly we can get all the information about our slave nodes using 
+``` ini
+sentinel slaves master01
+```
